@@ -1,0 +1,190 @@
+{% extends "base_layout.html" %}
+{% from "macro/tests.html" import test_macro %}
+{% from "macro/forms.html" import input,textarea,radio,radios, checkbox,select,modal %}
+{% import "macro/tests.html" as cm with context %}
+
+
+{%  macro cal(dt) %}
+<div class="container text-center table-sm">
+    <table class="table table-bordered">
+        <h1>{{ dt | month  }} 월</h1>
+        <thead>
+            <tr>
+                {% for w in '일월화수목금토' %}
+                    <th>
+                            {{w}}
+                    </th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+        {% for row in range(dt | sdt,dt | edt) | batch(7, '&nbsp;') %}
+        <tr>
+            {% for col in row %}
+                <td>
+                    {% if ((col | int) < 1) %}
+                        &nbsp;
+                    {% else %}
+                        {{ col | safe}}
+                    {% endif %}
+                </td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{%  endmacro %}
+
+
+{% block test %}
+<div>
+    <h1 class="text-center text-primary">
+        <small ><a href="/?year={{year -1}}" class="text-black-50 text-muted">{{year -1}}년</a></small>
+        {{year}}년
+        <small ><a href="/?year={{year +1}}" class="text-black-50 text-muted">{{year +1}}년</a></small>
+    </h1>
+
+    <div class="row">
+    {% for mm in range(1,13) | batch(3) %}
+        {% for m in mm %}
+            <div class="col">
+            {% set dt = '%s-%s-01' % (year,m) %}
+            {{cal(dt)}}
+            </div>
+        {% endfor %}
+    </div>
+    {% endfor %}
+</div>
+
+
+
+ <p>{{ttt}}::{{ cm.test_macro('password') }}</p>
+ <p>{{ test_macro('yyyyyuaudud') }}</p>
+
+
+ {% call(x) cm.test_macro2('Hong','bbb') %}
+ <p>This is app.html.macro.call block <strong>{{x}}</strong></p>
+ {% endcall %}
+
+<input type="text" id="'userid" name="userid" value="123" class="form-control">
+{{input(value='123')}}
+{{test_macro('123')}}
+{{textarea()}}
+{{radio()}}
+<textarea name="" id="" rows="10", class="form-control"></textarea>
+<select name="" id="">    
+    <option value="{{value}}">{{text}}</option>
+    <option value=""></option>
+    <option value=""></option>
+</select>
+
+<from class="container">
+    <div class="form-group">
+        {{radio('r1','rdo','val1','value1')}}
+        {{radio('r1','rdo','val1','value2')}}
+        {{radio('r1','rdo','val1','value3')}}
+    </div>
+</from>
+<p>{{today | symd | safe}}</p>
+<p>{{today | ymd('%Y-%m') | safe}}</p>
+<p>{{3096 | filesizeformat(True)}}</p>
+<p>{{"3026.53286" | float |round(2)}}</p>
+
+
+{{input('password','pw ')}}
+{{radios(radioList)}}
+{{textarea('idta','content','default value')}}
+{{checkbox(dict(id='chk1',name='chkname1',checked='checked',text='TEXT'))}}
+{{select([dict(id='seleid1',text='seltext1',selected=False),dict(id='seleid2',text='seltext2',selected=True)])}}
+
+<button type="button" onclick="openModal('modal1')" class="btn btn-primary" >Open modal test</button>
+
+{% call modal( 'modal1', 'test1','fas fa-user',True,"fn_test( )" ) %}
+    <h3>modal test</h3>
+    <script>
+        function fn_test() {
+            alert('qqqqqqqqqqqqqqqqq');
+            closeModal('modal1');
+        }
+    </script>
+{% endcall %}
+
+
+
+{% endblock %}
+
+
+
+
+{% block main %}
+<!--Section: Magazine v.1-->
+<section id="magazine" class="wow fadeIn">
+
+    <!--Section heading-->
+    <h2 class="h1 text-center my-5 font-weight-bold">K-POP Top 100</h2>
+
+    <!--Grid row-->
+    <div class="row text-left">
+
+        <!--Grid column-->
+        <div class="col-lg-6 col-md-6 col-sm-6">
+
+            <h3><a><strong>Live Top 100</strong></a></h3>
+
+            {% for s in lives %}
+                {{song(s)}}
+            {% endfor %}
+            <!--/Small news-->
+
+        </div>
+        <!--Grid column-->
+
+        <!--Grid column-->
+        <div class="col-lg-6 col-md-6 col-sm-6">
+            <h3><a><strong>Today's Top 100</strong></a></h3>
+
+            {% for s in todays %}
+            {{song(s)}}
+            {% endfor %}
+        </div>
+        <!--Grid column-->
+
+    </div>
+    <!--Grid row-->
+
+</section>
+<!--/Section: Magazine v.1-->
+
+<script>
+    function addToMyalbum(songno) {
+        var url = "/myalbum";
+        console.log("url>>", url, songno)
+        // url, method, data, dataType, fn
+        var $star = $('#star-' + songno);
+        send_ajax(url, 'POST', {songno: songno}, 'json', function (res) {
+            console.log("res>>", res, res.result, res.result === 'OK')
+            if (res && res.result === 'OK') {
+                console.log("----------------", $star)
+                $star.removeClass('far').addClass('fas');
+            }
+        }); 
+    }
+
+    function openSongInfo(songno) {
+        var url = "/songinfo/" + songno
+        console.log("url>>", url)
+        // url, method, data, dataType, fn
+        var $songinfo = $('#' + songno);
+        $('.songinfo').css('display', 'none');
+        send_ajax(url, 'GET', '', '', function(res) {
+            console.log("res>>", res)
+            $songinfo.html(res);
+            $songinfo.css('display', 'block');
+        });
+    }
+
+        
+    
+</script>
+{% endblock %}
